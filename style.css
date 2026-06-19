@@ -1,0 +1,77 @@
+@import "tailwindcss";
+@config "./tailwind.config.js";
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: theme('colors.md.background');
+}
+
+/* Material Image Hover */
+.md-image-card {
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.md-image-card:hover {
+    box-shadow: theme('boxShadow.md-3');
+}
+
+.md-image-card img {
+    transition: transform 0.5s ease;
+}
+
+.md-image-card:hover img {
+    transform: scale(1.03);
+}
+
+/* Hide scrollbar for gallery horizontal scroll on mobile */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Terminal Cursor Blink */
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.terminal-cursor {
+    animation: blink 1s step-end infinite;
+}
+
+/* Scroll Animation */
+.animate-on-scroll.is-visible {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Awwwards Hero Utilities */
+.stroke-text {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+    color: transparent;
+}
+@media (min-width: 768px) {
+    .stroke-text {
+        -webkit-text-stroke: 2px rgba(255, 255, 255, 0.3);
+    }
+}
+.stroke-text-blue {
+    -webkit-text-stroke: 1px rgba(0, 114, 206, 0.4);
+    color: transparent;
+}
+@media (min-width: 768px) {
+    .stroke-text-blue {
+        -webkit-text-stroke: 2px rgba(0, 114, 206, 0.4);
+    }
+}
+.animate-pulse-slow {
+    animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
