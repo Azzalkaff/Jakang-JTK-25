@@ -1,10 +1,10 @@
-import { supabase } from './supabaseClient';
+import { supabase } from './supabaseClient.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Material Drawer Mobile Menu Toggle
-    const btn = document.getElementById('mobile-menu-btn');
-    const menu = document.getElementById('mobile-menu');
-    const icon = btn.querySelector('i');
+    const btn = document.getElementById('mobile-menu-btn')!;
+    const menu = document.getElementById('mobile-menu')!;
+    const icon = btn.querySelector('i')!;
     const mobileLinks = document.querySelectorAll('.mobile-link');
 
     function toggleMenu() {
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ootdGrid) {
             ootdGrid.innerHTML = ''; // clear loading
             if (data && data.length > 0) {
-                data.forEach(post => {
+                data.forEach((post: any) => {
                     const card = document.createElement('div');
                     card.className = 'bg-white rounded-[24px] shadow-lg overflow-hidden flex flex-col group';
                     card.innerHTML = `
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         excList.innerHTML = '';
         if (data && data.length > 0) {
-            data.forEach(item => {
+            data.forEach((item: any) => {
                 const div = document.createElement('div');
                 div.className = 'bg-gray-50 border border-gray-200 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-[#0072CE] transition-colors';
                 div.innerHTML = `
