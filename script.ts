@@ -44,15 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Material Top App Bar Scroll Effect (Elevation Change)
     const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 10) {
-            navbar.classList.add('shadow-md-2', 'bg-md-surface/95', 'backdrop-blur-md');
-            navbar.classList.remove('bg-md-background');
-        } else {
-            navbar.classList.remove('shadow-md-2', 'bg-md-surface/95', 'backdrop-blur-md');
-            navbar.classList.add('bg-md-background');
-        }
-    });
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 10) {
+                navbar.classList.add('shadow-md-2', 'bg-[#0072CE]/95', 'backdrop-blur-md');
+                navbar.classList.remove('bg-[#0072CE]');
+            } else {
+                navbar.classList.remove('shadow-md-2', 'bg-[#0072CE]/95', 'backdrop-blur-md');
+                navbar.classList.add('bg-[#0072CE]');
+            }
+        });
+    }
 
     // --- NEW MVP FEATURES ---
 
