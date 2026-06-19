@@ -56,44 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- NEW MVP FEATURES ---
 
-    // 1. Terminal Boot-up Logic
-    const terminalLoading = document.getElementById('terminal-loading');
-    const terminalContent = document.getElementById('terminal-content');
-    if (terminalLoading && terminalContent) {
-        const bootText = [
-            "Initializing JTK_25_Identity.exe...",
-            "Loading modules: [██████████] 100%",
-            "Connecting to secure server...",
-            "Connection established.",
-            "Welcome, Informatics Engineering Batch 25."
-        ];
-        
-        let lineIndex = 0;
-        let charIndex = 0;
-        
-        function typeWriter() {
-            if (lineIndex < bootText.length) {
-                if (charIndex < bootText[lineIndex].length) {
-                    terminalContent!.innerHTML += bootText[lineIndex].charAt(charIndex);
-                    charIndex++;
-                    setTimeout(typeWriter, 30);
-                } else {
-                    terminalContent!.innerHTML += '<br/>';
-                    lineIndex++;
-                    charIndex = 0;
-                    setTimeout(typeWriter, 200);
-                }
-            } else {
-                // Done typing, fade out
-                setTimeout(() => {
-                    terminalLoading!.classList.add('opacity-0', 'pointer-events-none');
-                    setTimeout(() => terminalLoading!.remove(), 1000);
-                }, 1000);
-            }
-        }
-        
-        setTimeout(typeWriter, 500);
-    }
+
 
     // 2. Scroll Animations (IntersectionObserver)
     const observer = new IntersectionObserver((entries) => {
