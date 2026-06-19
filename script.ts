@@ -262,6 +262,11 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                 return;
             }
 
+            if (!supabase) {
+                alert("Database tidak terhubung.");
+                return;
+            }
+
             try {
                 uploadSubmitBtn.disabled = true;
                 uploadSpinner?.classList.remove('hidden');
@@ -340,7 +345,7 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
             .order('created_at', { ascending: false });
 
         if (error) {
-            excList.innerHTML = `<p class="text-red-500 text-center py-4">Gagal memuat bursa: ${error.message}</p>`;
+            excList.innerHTML = `<p class="text-red-500 text-center py-4">Gagal memuat daftar: ${error.message}</p>`;
             return;
         }
 
@@ -389,6 +394,11 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                 return;
             }
 
+            if (!supabase) {
+                alert("Database tidak terhubung.");
+                return;
+            }
+
             try {
                 excSubmitBtn.disabled = true;
                 excSpinner?.classList.remove('hidden');
@@ -407,7 +417,7 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                     addMyExchange(insertData[0].id);
                 }
 
-                alert('Berhasil didaftarkan ke Bursa Tukar!');
+                alert('Berhasil didaftarkan ke Daftar Tukar!');
                 excForm.reset();
                 fetchExchanges();
             } catch (err: any) {
@@ -422,6 +432,10 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
 
     // Initialize fetch
     fetchExchanges();
+
+    // Ekspos fungsi fetch ke global agar bisa dipanggil dari fungsi delete di bawah
+    window.fetchOotdPosts = fetchOotdPosts;
+    window.fetchExchanges = fetchExchanges;
 });
 
 // 6. Care Guide & Like Functions (Exposed to global window)
@@ -437,10 +451,6 @@ declare global {
         enableAdmin: () => void;
     }
 }
-
-// Ekspos fungsi fetch ke global agar bisa dipanggil dari delete
-window.fetchOotdPosts = fetchOotdPosts;
-window.fetchExchanges = fetchExchanges;
 
 window.enableAdmin = () => {
     const pw = prompt("Admin Access: Masukkan password");
@@ -488,7 +498,7 @@ window.deleteOotd = async (id: string, imageUrl: string) => {
 };
 
 window.deleteExchange = async (id: string) => {
-    if (!confirm("Tandai selesai dan hapus dari bursa tukar?")) return;
+    if (!confirm("Tandai selesai dan hapus dari daftar tukar?")) return;
     
     if (supabase) {
         const { error } = await supabase.from('size_exchanges').delete().eq('id', id);
@@ -496,12 +506,14 @@ window.deleteExchange = async (id: string) => {
             alert(`Gagal menghapus: ${error.message}`);
             return;
         }
-        alert("Bursa tukar berhasil diselesaikan!");
+        alert("Proses tukar berhasil diselesaikan!");
         window.fetchExchanges();
     }
 };
 
 window.likeOotd = async (id: string) => {
+    if (!supabase) return;
+    
     // Optimistic UI update
     const countSpan = document.getElementById(`like-count-${id}`);
     if (countSpan) {

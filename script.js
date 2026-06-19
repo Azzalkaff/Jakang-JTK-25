@@ -1,4 +1,10 @@
 import { supabase } from './supabaseClient.js';
+// Global Auth State (Tanpa Login, via LocalStorage)
+const isAdmin = localStorage.getItem('jtk25_admin') === 'true';
+const getMyOotds = () => JSON.parse(localStorage.getItem('my_ootds') || '[]');
+const addMyOotd = (id) => { const arr = getMyOotds(); arr.push(id); localStorage.setItem('my_ootds', JSON.stringify(arr)); };
+const getMyExchanges = () => JSON.parse(localStorage.getItem('my_exchanges') || '[]');
+const addMyExchange = (id) => { const arr = getMyExchanges(); arr.push(id); localStorage.setItem('my_exchanges', JSON.stringify(arr)); };
 document.addEventListener('DOMContentLoaded', () => {
     // Material Drawer Mobile Menu Toggle
     const btn = document.getElementById('mobile-menu-btn');
@@ -52,6 +58,96 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     // --- NEW MVP FEATURES ---
+    // 1. LIGHTBOX LOGIC
+    const lightboxModal = document.getElementById('lightbox-modal');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+    const lightboxNext = document.getElementById('lightbox-next');
+    let currentLightboxImages = [];
+    let currentLightboxIndex = 0;
+    function updateLightboxImage() {
+        if (!lightboxImg || !lightboxCaption)
+            return;
+        const imgData = currentLightboxImages[currentLightboxIndex];
+        if (imgData) {
+            lightboxImg.src = imgData.src;
+            lightboxCaption.textContent = imgData.caption;
+            lightboxImg.classList.remove('scale-95');
+            lightboxImg.classList.add('scale-100');
+        }
+    }
+    function openLightbox(images, index) {
+        if (!lightboxModal)
+            return;
+        currentLightboxImages = images;
+        currentLightboxIndex = index;
+        lightboxModal.classList.remove('hidden');
+        lightboxModal.classList.add('flex');
+        void lightboxModal.offsetWidth; // trigger reflow
+        lightboxModal.classList.remove('opacity-0');
+        lightboxModal.classList.add('opacity-100');
+        updateLightboxImage();
+        document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+        if (!lightboxModal || !lightboxImg)
+            return;
+        lightboxModal.classList.remove('opacity-100');
+        lightboxModal.classList.add('opacity-0');
+        lightboxImg.classList.remove('scale-100');
+        lightboxImg.classList.add('scale-95');
+        setTimeout(() => {
+            lightboxModal.classList.remove('flex');
+            lightboxModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+    if (lightboxClose)
+        lightboxClose.addEventListener('click', closeLightbox);
+    if (lightboxModal) {
+        lightboxModal.addEventListener('click', (e) => {
+            if (e.target === lightboxModal)
+                closeLightbox();
+        });
+    }
+    if (lightboxPrev) {
+        lightboxPrev.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentLightboxImages.length > 0) {
+                currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length;
+                updateLightboxImage();
+            }
+        });
+    }
+    if (lightboxNext) {
+        lightboxNext.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentLightboxImages.length > 0) {
+                currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length;
+                updateLightboxImage();
+            }
+        });
+    }
+    // Attach to Static Gallery
+    const gallerySection = document.getElementById('gallery');
+    if (gallerySection) {
+        const cards = Array.from(gallerySection.querySelectorAll('.md-image-card'));
+        cards.forEach((card, index) => {
+            const img = card.querySelector('img');
+            if (img) {
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    const images = cards.map(c => ({
+                        src: c.querySelector('img')?.src || '',
+                        caption: c.querySelector('p')?.textContent || 'Gallery Image'
+                    }));
+                    openLightbox(images, index);
+                });
+            }
+        });
+    }
     // 2. Scroll Animations (IntersectionObserver)
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -68,10 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const secret = 'jtk25';
     window.addEventListener('keydown', (e) => {
         keys += e.key.toLowerCase();
-        if (keys.length > secret.length) {
-            keys = keys.slice(1);
-        }
-        if (keys === secret) {
+        // Matrix Easter Egg
+        if (keys.endsWith(secret)) {
             const modal = document.getElementById('matrix-modal');
             if (modal) {
                 modal.classList.remove('hidden');
@@ -103,11 +197,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ootdGrid) {
             ootdGrid.innerHTML = ''; // clear loading
             if (data && data.length > 0) {
-                data.forEach((post) => {
+                const ootdImages = data.map((p) => ({ src: p.image_url, caption: p.name || 'OOTD' }));
+                const myOotds = getMyOotds();
+                data.forEach((post, index) => {
+                    const isOwner = isAdmin || myOotds.includes(post.id);
+                    const deleteBtnHtml = isOwner ?
+                        `<button onclick="window.deleteOotd('${post.id}', '${post.image_url}')" class="absolute top-3 right-3 w-8 h-8 bg-red-500 text-white rounded-full shadow-lg flex justify-center items-center hover:bg-red-600 transition z-10" title="Hapus Foto">
+                            <i class="fa-solid fa-trash text-sm"></i>
+                        </button>` : '';
                     const card = document.createElement('div');
-                    card.className = 'bg-white rounded-[24px] shadow-lg overflow-hidden flex flex-col group';
+                    card.className = 'bg-white rounded-[24px] shadow-lg overflow-hidden flex flex-col group relative';
                     card.innerHTML = `
-                        <div class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100">
+                        ${deleteBtnHtml}
+                        <div class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100 cursor-zoom-in ootd-img-container">
                             <img src="${post.image_url}" alt="${post.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         </div>
                         <div class="p-4 flex justify-between items-center">
@@ -119,6 +221,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `;
                     ootdGrid.appendChild(card);
+                    const imgContainer = card.querySelector('.ootd-img-container');
+                    if (imgContainer) {
+                        imgContainer.addEventListener('click', () => {
+                            if (window.openLightbox)
+                                window.openLightbox(ootdImages, index);
+                        });
+                    }
                 });
             }
             else {
@@ -133,6 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = ootdNameInput.value.trim();
             if (!file || !name) {
                 alert("Mohon isi nama dan pilih foto!");
+                return;
+            }
+            if (!supabase) {
+                alert("Database tidak terhubung.");
                 return;
             }
             try {
@@ -153,11 +266,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     .getPublicUrl(filePath);
                 const imageUrl = publicUrlData.publicUrl;
                 // Insert into DB
-                const { error: dbError } = await supabase
+                const { data: insertData, error: dbError } = await supabase
                     .from('ootd_posts')
-                    .insert([{ name, image_url: imageUrl, likes: 0 }]);
+                    .insert([{ name, image_url: imageUrl, likes: 0 }])
+                    .select();
                 if (dbError)
                     throw dbError;
+                // Simpan ID ke LocalStorage agar pemiliknya bisa hapus nanti
+                if (insertData && insertData[0]) {
+                    addMyOotd(insertData[0].id);
+                }
                 alert("OOTD berhasil di-upload! 🔥");
                 ootdForm.reset();
                 document.getElementById('file-name-display').innerText = 'Klik untuk memilih foto';
@@ -202,7 +320,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         excList.innerHTML = '';
         if (data && data.length > 0) {
+            const myExchanges = getMyExchanges();
             data.forEach((item) => {
+                const isOwner = isAdmin || myExchanges.includes(item.id);
+                const deleteBtnHtml = isOwner ?
+                    `<button onclick="window.deleteExchange('${item.id}')" class="bg-gray-200 hover:bg-red-500 hover:text-white text-gray-500 px-3 py-2 rounded-xl text-xs font-bold transition-colors ml-2" title="Tandai Selesai / Hapus">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>` : '';
                 const div = document.createElement('div');
                 div.className = 'bg-gray-50 border border-gray-200 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-[#0072CE] transition-colors';
                 div.innerHTML = `
@@ -214,9 +338,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded">Cari: ${item.want_size}</span>
                         </div>
                     </div>
-                    <a href="https://wa.me/${item.contact.replace(/[^0-9]/g, '')}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center shrink-0 transition-colors">
-                        <i class="fa-brands fa-whatsapp mr-2"></i> Hubungi
-                    </a>
+                    <div class="flex shrink-0">
+                        <a href="https://wa.me/${item.contact.replace(/[^0-9]/g, '')}" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center transition-colors">
+                            <i class="fa-brands fa-whatsapp mr-2"></i> Hubungi
+                        </a>
+                        ${deleteBtnHtml}
+                    </div>
                 `;
                 excList.appendChild(div);
             });
@@ -232,17 +359,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Ukuran yang dimiliki dan dicari tidak boleh sama!');
                 return;
             }
+            if (!supabase) {
+                alert("Database tidak terhubung.");
+                return;
+            }
             try {
                 excSubmitBtn.disabled = true;
                 excSpinner?.classList.remove('hidden');
-                const { error } = await supabase.from('size_exchanges').insert([{
+                const { data: insertData, error } = await supabase.from('size_exchanges').insert([{
                         name: excName.value.trim(),
                         have_size: excHave.value,
                         want_size: excWant.value,
                         contact: excContact.value.trim()
-                    }]);
+                    }]).select();
                 if (error)
                     throw error;
+                // Simpan ID ke LocalStorage
+                if (insertData && insertData[0]) {
+                    addMyExchange(insertData[0].id);
+                }
                 alert('Berhasil didaftarkan ke Bursa Tukar!');
                 excForm.reset();
                 fetchExchanges();
@@ -259,8 +394,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Initialize fetch
     fetchExchanges();
+    // Ekspos fungsi fetch ke global agar bisa dipanggil dari fungsi delete di bawah
+    window.fetchOotdPosts = fetchOotdPosts;
+    window.fetchExchanges = fetchExchanges;
 });
+window.enableAdmin = () => {
+    const pw = prompt("Admin Access: Masukkan password");
+    if (pw === "jtk25admin") {
+        if (isAdmin) {
+            localStorage.removeItem('jtk25_admin');
+            console.log("Admin mode dinonaktifkan.");
+            alert("Admin mode dinonaktifkan.");
+        }
+        else {
+            localStorage.setItem('jtk25_admin', 'true');
+            console.log("Admin mode diaktifkan!");
+            alert("Admin mode diaktifkan! Anda bisa menghapus semua postingan.");
+        }
+        location.reload();
+    }
+    else if (pw !== null) {
+        console.error("Password salah.");
+        alert("Password salah.");
+    }
+};
+window.deleteOotd = async (id, imageUrl) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus foto OOTD ini?"))
+        return;
+    if (supabase) {
+        // Hapus dari database
+        const { error } = await supabase.from('ootd_posts').delete().eq('id', id);
+        if (error) {
+            alert(`Gagal menghapus: ${error.message}`);
+            return;
+        }
+        // Hapus fotonya dari storage (opsional tapi baik untuk hemat ruang)
+        try {
+            const fileName = imageUrl.split('/').pop();
+            if (fileName) {
+                await supabase.storage.from('ootd_images').remove([`public/${fileName}`]);
+            }
+        }
+        catch (e) {
+            console.warn("Could not delete image file", e);
+        }
+        alert("Foto berhasil dihapus!");
+        window.fetchOotdPosts();
+    }
+};
+window.deleteExchange = async (id) => {
+    if (!confirm("Tandai selesai dan hapus dari bursa tukar?"))
+        return;
+    if (supabase) {
+        const { error } = await supabase.from('size_exchanges').delete().eq('id', id);
+        if (error) {
+            alert(`Gagal menghapus: ${error.message}`);
+            return;
+        }
+        alert("Bursa tukar berhasil diselesaikan!");
+        window.fetchExchanges();
+    }
+};
 window.likeOotd = async (id) => {
+    if (!supabase)
+        return;
     // Optimistic UI update
     const countSpan = document.getElementById(`like-count-${id}`);
     if (countSpan) {
