@@ -247,6 +247,7 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
             
             if (data && data.length > 0) {
                 const myOotds = getMyOotds();
+                const likedPosts = JSON.parse(localStorage.getItem('jtk25_liked') || '[]');
 
                 data.forEach((post: any) => {
                     const index = (window as any).currentOotdImages.length;
@@ -259,6 +260,10 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                         </button>` : '';
 
                     const commentHtml = post.comment ? `<p class="text-sm text-gray-600 mt-2 italic break-words line-clamp-2">"${post.comment}"</p>` : '';
+
+                    const isLiked = likedPosts.includes(post.id);
+                    const likeBtnClass = isLiked ? 'text-red-500 opacity-80 cursor-default' : 'text-gray-500 hover:text-red-500 transition-colors';
+                    const likeOnClick = isLiked ? '' : `onclick="window.likeOotd('${post.id}')"`;
 
                     const card = document.createElement('div');
                     card.className = 'bg-white rounded-[24px] shadow-lg overflow-hidden flex flex-col group relative';
@@ -274,7 +279,7 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                                     <button onclick="window.openCommentModal('${post.id}')" class="flex items-center gap-1.5 text-gray-500 hover:text-[#0072CE] transition-colors">
                                         <i class="fa-regular fa-comment"></i>
                                     </button>
-                                    <button onclick="window.likeOotd('${post.id}')" class="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition-colors">
+                                    <button ${likeOnClick} class="flex items-center gap-1.5 ${likeBtnClass}">
                                         <i class="fa-solid fa-heart"></i>
                                         <span id="like-count-${post.id}" class="font-mono text-sm">${post.likes || 0}</span>
                                     </button>
@@ -428,7 +433,8 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
             .from('ootd_comments')
             .select('*')
             .eq('post_id', postId)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(30);
 
         commentLoader.classList.add('hidden');
 
@@ -704,19 +710,35 @@ window.deleteExchange = async (id: string) => {
 window.likeOotd = async (id: string) => {
     if (!supabase) return;
     
+    // Cek localStorage apakah sudah like
+    const likedPosts = JSON.parse(localStorage.getItem('jtk25_liked') || '[]');
+    if (likedPosts.includes(id)) {
+        return; // Sudah dilike, abaikan klik
+    }
+
     // Optimistic UI update
     const countSpan = document.getElementById(`like-count-${id}`);
     if (countSpan) {
         let currentLikes = parseInt(countSpan.innerText);
         countSpan.innerText = (currentLikes + 1).toString();
-        countSpan.parentElement!.classList.add('text-red-500');
-        countSpan.parentElement!.classList.remove('text-gray-500');
+        
+        const btn = countSpan.parentElement!;
+        btn.className = 'flex items-center gap-1.5 text-red-500 opacity-80 cursor-default';
+        btn.onclick = null; // Remove listener to prevent spam
     }
 
+    // Simpan ke localStorage agar terkunci
+    likedPosts.push(id);
+    localStorage.setItem('jtk25_liked', JSON.stringify(likedPosts));
+
     // Increment in DB
-    const { data } = await supabase.from('ootd_posts').select('likes').eq('id', id).single();
-    if (data) {
-        await supabase.from('ootd_posts').update({ likes: data.likes + 1 }).eq('id', id);
+    try {
+        const { data } = await supabase.from('ootd_posts').select('likes').eq('id', id).single();
+        if (data) {
+            await supabase.from('ootd_posts').update({ likes: data.likes + 1 }).eq('id', id);
+        }
+    } catch (err) {
+        console.error("Gagal mengirim like", err);
     }
 };
 
