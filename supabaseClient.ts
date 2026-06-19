@@ -3,9 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
 const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-    console.warn("Peringatan: Kunci Supabase belum disetel di file .env!");
-}
+// Inisialisasi klien Supabase HANYA JIKA key tersedia
+export const supabase = (supabaseUrl && supabaseKey) 
+    ? createClient(supabaseUrl, supabaseKey) 
+    : null;
 
-// Inisialisasi klien Supabase
-export const supabase = createClient(supabaseUrl || '', supabaseKey || '');
+if (!supabase) {
+    console.warn("Peringatan: Kunci Supabase belum disetel di environment Vercel. Fitur database dimatikan sementara agar aplikasi tetap berjalan.");
+}
