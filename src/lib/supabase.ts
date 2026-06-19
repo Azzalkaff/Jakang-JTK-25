@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
 const supabaseKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
 
-// Inisialisasi klien Supabase HANYA JIKA key tersedia
 export const supabase = (supabaseUrl && supabaseKey) 
     ? createClient(supabaseUrl, supabaseKey) 
     : null;
