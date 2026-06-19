@@ -132,7 +132,7 @@
     </section>
 
     <!-- OOTD Hall of Fame Section -->
-    <section id="ootd" class="py-16 md:py-24 bg-[#E1D9CD] relative z-10 border-t border-[#0072CE]/10">
+    <section id="ootd" class="py-16 md:py-24 bg-white relative z-10 border-t border-[#0072CE]/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                 <div class="w-full md:w-auto text-center md:text-left">
@@ -157,7 +157,7 @@
     </section>
 
     <!-- Size Exchange Section -->
-    <section id="exchange" class="py-16 md:py-24 bg-[#F8F9FA] relative z-10 border-t border-[#0072CE]/10">
+    <section id="exchange" class="py-16 md:py-24 bg-[#E1D9CD] relative z-10 border-t border-[#0072CE]/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-[#0072CE] font-bold tracking-[0.2em] uppercase text-xs mb-3">Solusi Ukuran</h2>
@@ -228,7 +228,7 @@
     </section>
 
     <!-- Design Sheet Section -->
-    <section id="design" class="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out py-16 md:py-24 bg-md-surface">
+    <section id="design" class="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out py-16 md:py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-md-primary font-bold tracking-widest uppercase text-sm mb-2">Cetak Biru</h2>
@@ -263,7 +263,7 @@
     </section>
 
     <!-- Gallery Section -->
-    <section id="gallery" class="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out py-16 md:py-24 bg-md-background">
+    <section id="gallery" class="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out py-16 md:py-24 bg-[#E1D9CD]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6 text-center md:text-left">
                 <div>
@@ -322,7 +322,7 @@
     </section>
 
     <!-- Details Section -->
-    <section id="details" class="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out py-16 md:py-24 bg-md-surface">
+    <section id="details" class="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out py-16 md:py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-md-primary font-bold tracking-widest uppercase text-sm mb-2">Fitur</h2>
@@ -371,7 +371,7 @@
 
 
     <!-- Story / Philosophy Section -->
-    <section id="story" class="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out py-16 md:py-24 bg-md-surfaceVariant">
+    <section id="story" class="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 ease-out py-16 md:py-24 bg-[#E1D9CD]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-md-surface rounded-[32px] shadow-md-2 overflow-hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-2">
@@ -441,14 +441,23 @@
             </div>
 
             <!-- Middle: Social Icons -->
-            <div class="flex justify-center space-x-4">
-                <a href="#"
-                    class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-[#001D36] transition active:scale-95 text-white shadow-sm">
-                    <i class="fa-brands fa-instagram text-lg"></i>
-                </a>
-                <a href="#"
-                    class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-[#001D36] transition active:scale-95 text-white shadow-sm">
-                    <i class="fa-brands fa-whatsapp text-lg"></i>
+            <div class="flex justify-center">
+                <a href="https://www.instagram.com/jtk.2025" target="_blank" rel="noopener noreferrer"
+                    class="px-6 py-3 rounded-full bg-white/20 flex items-center gap-3 hover:bg-[#001D36] transition-all active:scale-95 text-white shadow-md hover:shadow-lg">
+                    <!-- Original Instagram Logo SVG -->
+                    <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="ig-grad" x1="2%" y1="84%" x2="100%" y2="15%">
+                                <stop offset="0%" stop-color="#f09433" />
+                                <stop offset="25%" stop-color="#e6683c" />
+                                <stop offset="50%" stop-color="#dc2743" />
+                                <stop offset="75%" stop-color="#cc2366" />
+                                <stop offset="100%" stop-color="#bc1888" />
+                            </linearGradient>
+                        </defs>
+                        <path fill="url(#ig-grad)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm5.838-10.338a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                    </svg>
+                    <span class="font-bold tracking-wider text-lg">@jtk.2025</span>
                 </a>
             </div>
 
