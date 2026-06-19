@@ -508,6 +508,21 @@
         </div>
     </div>
 
+    <!-- Image Lightbox Modal -->
+    <div id="lightbox-modal" class="fixed inset-0 z-[300] bg-black/95 hidden flex-col justify-center items-center opacity-0 transition-opacity duration-300">
+        <button id="lightbox-close" class="absolute top-6 right-6 text-white/70 hover:text-white focus:outline-none z-50 p-2">
+            <i class="fa-solid fa-xmark text-4xl"></i>
+        </button>
+        <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white focus:outline-none z-50 p-4">
+            <i class="fa-solid fa-chevron-left text-4xl drop-shadow-md"></i>
+        </button>
+        <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white focus:outline-none z-50 p-4">
+            <i class="fa-solid fa-chevron-right text-4xl drop-shadow-md"></i>
+        </button>
+        <img id="lightbox-img" src="" alt="Expanded Image" class="max-w-[95%] max-h-[85vh] object-contain transition-transform duration-300 scale-95 drop-shadow-2xl">
+        <div id="lightbox-caption" class="absolute bottom-8 text-white/90 font-medium text-center px-4 w-full text-lg tracking-wide drop-shadow-md"></div>
+    </div>
+
     <!-- Scripts for Interaction -->
     <script type="module" src="/script.ts"></script>
 </body>
