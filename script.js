@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .select('*')
             .order('created_at', { ascending: false });
         if (error) {
-            excList.innerHTML = `<p class="text-red-500 text-center py-4">Gagal memuat bursa: ${error.message}</p>`;
+            excList.innerHTML = `<p class="text-red-500 text-center py-4">Gagal memuat daftar: ${error.message}</p>`;
             return;
         }
         excList.innerHTML = '';
@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (insertData && insertData[0]) {
                     addMyExchange(insertData[0].id);
                 }
-                alert('Berhasil didaftarkan ke Bursa Tukar!');
+                alert('Berhasil didaftarkan ke Daftar Tukar!');
                 excForm.reset();
                 fetchExchanges();
             }
@@ -443,7 +443,7 @@ window.deleteOotd = async (id, imageUrl) => {
     }
 };
 window.deleteExchange = async (id) => {
-    if (!confirm("Tandai selesai dan hapus dari bursa tukar?"))
+    if (!confirm("Tandai selesai dan hapus dari daftar tukar?"))
         return;
     if (supabase) {
         const { error } = await supabase.from('size_exchanges').delete().eq('id', id);
@@ -451,7 +451,7 @@ window.deleteExchange = async (id) => {
             alert(`Gagal menghapus: ${error.message}`);
             return;
         }
-        alert("Bursa tukar berhasil diselesaikan!");
+        alert("Proses tukar berhasil diselesaikan!");
         window.fetchExchanges();
     }
 };
