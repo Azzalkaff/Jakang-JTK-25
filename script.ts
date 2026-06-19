@@ -172,7 +172,6 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
     // 3. Easter Egg Keylogger
     let keys = '';
     const secret = 'jtk25';
-    const adminSecret = 'admin';
     window.addEventListener('keydown', (e) => {
         keys += e.key.toLowerCase();
         
@@ -182,24 +181,6 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
             if (modal) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
-            }
-            keys = ''; // reset
-        }
-        
-        // Admin Mode Toggle
-        if (keys.endsWith(adminSecret)) {
-            const pw = prompt("Admin Access: Masukkan password");
-            if (pw === "jtk25admin") {
-                if (isAdmin) {
-                    localStorage.removeItem('jtk25_admin');
-                    alert("Admin mode dinonaktifkan.");
-                } else {
-                    localStorage.setItem('jtk25_admin', 'true');
-                    alert("Admin mode diaktifkan! Anda bisa menghapus semua postingan.");
-                }
-                location.reload();
-            } else if (pw !== null) {
-                alert("Password salah.");
             }
             keys = ''; // reset
         }
@@ -453,12 +434,32 @@ declare global {
         deleteExchange: (id: string) => void;
         fetchOotdPosts: () => void;
         fetchExchanges: () => void;
+        enableAdmin: () => void;
     }
 }
 
 // Ekspos fungsi fetch ke global agar bisa dipanggil dari delete
 window.fetchOotdPosts = fetchOotdPosts;
 window.fetchExchanges = fetchExchanges;
+
+window.enableAdmin = () => {
+    const pw = prompt("Admin Access: Masukkan password");
+    if (pw === "jtk25admin") {
+        if (isAdmin) {
+            localStorage.removeItem('jtk25_admin');
+            console.log("Admin mode dinonaktifkan.");
+            alert("Admin mode dinonaktifkan.");
+        } else {
+            localStorage.setItem('jtk25_admin', 'true');
+            console.log("Admin mode diaktifkan!");
+            alert("Admin mode diaktifkan! Anda bisa menghapus semua postingan.");
+        }
+        location.reload();
+    } else if (pw !== null) {
+        console.error("Password salah.");
+        alert("Password salah.");
+    }
+};
 
 window.deleteOotd = async (id: string, imageUrl: string) => {
     if (!confirm("Apakah Anda yakin ingin menghapus foto OOTD ini?")) return;
