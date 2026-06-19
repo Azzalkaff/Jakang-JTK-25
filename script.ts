@@ -193,27 +193,64 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
     const uploadSpinner = document.getElementById('upload-spinner');
     const uploadSubmitBtn = document.getElementById('upload-submit-btn') as HTMLButtonElement;
     const ootdGrid = document.getElementById('ootd-grid');
+    const loadMoreContainer = document.getElementById('load-more-container');
+    const loadMoreBtn = document.getElementById('load-more-btn');
 
-    async function fetchOotdPosts() {
+    let ootdPage = 0;
+    const OOTD_PAGE_SIZE = 12;
+    let isLoadingOotd = false;
+
+    async function fetchOotdPosts(append = false) {
         if (!supabase) return;
-        const { data, error } = await supabase
+        if (isLoadingOotd) return;
+        isLoadingOotd = true;
+
+        if (loadMoreBtn && append) {
+            const icon = loadMoreBtn.querySelector('i');
+            if (icon) {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-circle-notch', 'fa-spin');
+            }
+        }
+
+        const from = ootdPage * OOTD_PAGE_SIZE;
+        const to = from + OOTD_PAGE_SIZE - 1;
+
+        const { data, error, count } = await supabase
             .from('ootd_posts')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*', { count: 'exact' })
+            .order('created_at', { ascending: false })
+            .range(from, to);
+
+        isLoadingOotd = false;
+
+        if (loadMoreBtn && append) {
+            const icon = loadMoreBtn.querySelector('i');
+            if (icon) {
+                icon.classList.remove('fa-circle-notch', 'fa-spin');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
 
         if (error) {
             console.error('Error fetching OOTD:', error);
-            if (ootdGrid) ootdGrid.innerHTML = `<p class="text-red-500 col-span-full text-center">Gagal memuat data dari server: ${error.message}</p>`;
+            if (ootdGrid && !append) ootdGrid.innerHTML = `<p class="text-red-500 col-span-full text-center">Gagal memuat data dari server: ${error.message}</p>`;
             return;
         }
 
         if (ootdGrid) {
-            ootdGrid.innerHTML = ''; // clear loading
+            if (!append) {
+                ootdGrid.innerHTML = ''; // clear loading
+                (window as any).currentOotdImages = [];
+            }
+            
             if (data && data.length > 0) {
-                const ootdImages = data.map((p: any) => ({ src: p.image_url, caption: p.name || 'OOTD' }));
                 const myOotds = getMyOotds();
 
-                data.forEach((post: any, index: number) => {
+                data.forEach((post: any) => {
+                    const index = (window as any).currentOotdImages.length;
+                    (window as any).currentOotdImages.push({ src: post.image_url, caption: post.name || 'OOTD' });
+
                     const isOwner = isAdmin || myOotds.includes(post.id);
                     const deleteBtnHtml = isOwner ? 
                         `<button onclick="window.deleteOotd('${post.id}', '${post.image_url}')" class="absolute top-3 right-3 w-8 h-8 bg-red-500 text-white rounded-full shadow-lg flex justify-center items-center hover:bg-red-600 transition z-10" title="Hapus Foto">
@@ -225,7 +262,7 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                     card.innerHTML = `
                         ${deleteBtnHtml}
                         <div class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100 cursor-zoom-in ootd-img-container">
-                            <img src="${post.image_url}" alt="${post.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <img src="${post.image_url}" alt="${post.name}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         </div>
                         <div class="p-4 flex justify-between items-center">
                             <p class="font-bold text-[#001D36] truncate flex-1">${post.name}</p>
@@ -240,14 +277,30 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                     const imgContainer = card.querySelector('.ootd-img-container');
                     if (imgContainer) {
                         imgContainer.addEventListener('click', () => {
-                            if ((window as any).openLightbox) (window as any).openLightbox(ootdImages, index);
+                            if ((window as any).openLightbox) (window as any).openLightbox((window as any).currentOotdImages, index);
                         });
                     }
                 });
-            } else {
+
+                if (loadMoreContainer) {
+                    if (count && count > to) {
+                        loadMoreContainer.classList.remove('hidden');
+                    } else {
+                        loadMoreContainer.classList.add('hidden');
+                    }
+                }
+            } else if (!append) {
                 ootdGrid.innerHTML = `<p class="col-span-full text-center text-gray-500 font-mono py-12">Belum ada data OOTD. Jadilah yang pertama!</p>`;
+                if (loadMoreContainer) loadMoreContainer.classList.add('hidden');
             }
         }
+    }
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+            ootdPage++;
+            fetchOotdPosts(true);
+        });
     }
 
     if (ootdForm) {
@@ -312,7 +365,8 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                     modal.classList.remove('flex');
                 }
 
-                fetchOotdPosts();
+                ootdPage = 0;
+                fetchOotdPosts(false);
 
             } catch (err: any) {
                 console.error("Upload error:", err);

@@ -18,6 +18,10 @@ Arsitektur ini dipilih secara spesifik untuk memenuhi kriteria: **Kecepatan Peng
 *   **Vanilla CSS (`style.css`):** Digunakan secara minimal hanya untuk membuat efek-efek khusus yang sulit dilakukan oleh Tailwind standar, seperti *noise grain background*, *blinking cursor* terminal, dan manipulasi *text-stroke* khusus.
 *   **FontAwesome (CDN):** Penyedia *icon-set* untuk tombol interaktif (seperti ikon hati, WhatsApp, dan *upload*).
 
+### C. Moderation & State Management
+*   **LocalStorage Ownership Tokens:** Mekanisme CRUD *frictionless* (tanpa login). Browser secara otomatis mencatat ID (UUID) dari setiap data yang dikirim pengguna. Dengan ID ini, pengguna diberikan akses eksklusif untuk menghapus postingan milik mereka sendiri selama mereka masih berada di perangkat dan *browser* yang sama.
+*   **Console Admin Mode:** *Master backdoor* khusus untuk pemilik *website*. Dengan mengeksekusi perintah `enableAdmin()` langsung dari *Browser Developer Tools Console* dan memasukkan *password* rahasia, *admin* dapat memunculkan tombol hapus pada semua entri data untuk membersihkan *spam* atau konten yang tidak pantas.
+
 ---
 
 ## 2. Backend & Database (Server-Side)
@@ -27,7 +31,7 @@ Untuk mengejar *Minimum Viable Product* (MVP) dalam hitungan jam, kami tidak mem
 *   **Supabase:** Alternatif *open-source* dari Firebase yang menjadi tulang punggung seluruh fitur dinamis web ini.
 *   **Supabase PostgreSQL:** *Relational database* tingkat produksi yang digunakan untuk menampung dua fitur utama:
     *   `ootd_posts`: Tabel untuk menyimpan data partisipasi unggahan foto jaket beserta interaksi *Likes*.
-    *   `size_exchanges`: Tabel untuk mengelola bursa tukar menukar ukuran jaket antar mahasiswa secara *real-time*.
+    *   `size_exchanges`: Tabel untuk mengelola daftar tukar menukar ukuran jaket antar mahasiswa secara *real-time*.
 *   **Supabase Storage:** S3-compatible *bucket* (`ootd_images`) yang difungsikan sebagai CDN untuk menampung *file* foto OOTD yang diunggah oleh mahasiswa.
 *   **Supabase JS SDK (`@supabase/supabase-js`):** Pustaka antarmuka yang menghubungkan logika TypeScript di *frontend* langsung dengan *database* Supabase.
 
@@ -45,4 +49,4 @@ Untuk mengejar *Minimum Viable Product* (MVP) dalam hitungan jam, kami tidak mem
 1. Pengguna memuat halaman statis yang dirender secara cepat oleh **Vite**.
 2. Animasi UI (Terminal Booting, Matrix Easter Egg, Scroll Animations) ditangani seluruhnya oleh **Vanilla TypeScript**.
 3. Saat pengguna mengisi *form upload* OOTD, **Supabase SDK** mengunggah foto ke **Storage**, mendapatkan URL publik, lalu menyisipkan datanya ke tabel **PostgreSQL**.
-4. Komponen *Live Board* (Bursa Tukar) memanggil API Supabase secara asinkron untuk memperbarui daftar data di layar tanpa memuat ulang halaman (*No-reload Fetching*).
+4. Komponen *Live Board* (Daftar Tukar Ukuran) memanggil API Supabase secara asinkron untuk memperbarui daftar data di layar tanpa memuat ulang halaman (*No-reload Fetching*).
