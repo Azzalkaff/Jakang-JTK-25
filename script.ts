@@ -190,6 +190,7 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
     const ootdForm = document.getElementById('upload-form') as HTMLFormElement;
     const ootdNameInput = document.getElementById('ootd-name') as HTMLInputElement;
     const ootdFileInput = document.getElementById('ootd-file') as HTMLInputElement;
+    const ootdCommentInput = document.getElementById('ootd-comment') as HTMLTextAreaElement;
     const uploadSpinner = document.getElementById('upload-spinner');
     const uploadSubmitBtn = document.getElementById('upload-submit-btn') as HTMLButtonElement;
     const ootdGrid = document.getElementById('ootd-grid');
@@ -257,6 +258,8 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                             <i class="fa-solid fa-trash text-sm"></i>
                         </button>` : '';
 
+                    const commentHtml = post.comment ? `<p class="text-sm text-gray-600 mt-2 italic break-words line-clamp-2">"${post.comment}"</p>` : '';
+
                     const card = document.createElement('div');
                     card.className = 'bg-white rounded-[24px] shadow-lg overflow-hidden flex flex-col group relative';
                     card.innerHTML = `
@@ -264,12 +267,15 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                         <div class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100 cursor-zoom-in ootd-img-container">
                             <img src="${post.image_url}" alt="${post.name}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         </div>
-                        <div class="p-4 flex justify-between items-center">
-                            <p class="font-bold text-[#001D36] truncate flex-1">${post.name}</p>
-                            <button onclick="window.likeOotd('${post.id}')" class="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors ml-4 shrink-0">
-                                <i class="fa-solid fa-heart"></i>
-                                <span id="like-count-${post.id}" class="font-mono text-sm">${post.likes || 0}</span>
-                            </button>
+                        <div class="p-4 flex flex-col justify-between">
+                            <div class="flex justify-between items-start">
+                                <p class="font-bold text-[#001D36] truncate flex-1">${post.name}</p>
+                                <button onclick="window.likeOotd('${post.id}')" class="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors ml-4 shrink-0">
+                                    <i class="fa-solid fa-heart"></i>
+                                    <span id="like-count-${post.id}" class="font-mono text-sm">${post.likes || 0}</span>
+                                </button>
+                            </div>
+                            ${commentHtml}
                         </div>
                     `;
                     ootdGrid.appendChild(card);
@@ -309,6 +315,7 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
             
             const file = ootdFileInput.files?.[0];
             const name = ootdNameInput.value.trim();
+            const comment = ootdCommentInput ? ootdCommentInput.value.trim() : null;
 
             if (!file || !name) {
                 alert("Mohon isi nama dan pilih foto!");
@@ -345,7 +352,7 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                 // Insert into DB
                 const { data: insertData, error: dbError } = await supabase
                     .from('ootd_posts')
-                    .insert([{ name, image_url: imageUrl, likes: 0 }])
+                    .insert([{ name, image_url: imageUrl, likes: 0, comment }])
                     .select();
 
                 if (dbError) throw dbError;

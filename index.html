@@ -514,6 +514,11 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Komentar / Caption (Opsional)</label>
+                    <textarea id="ootd-comment" placeholder="Tulis caption gaya jaketmu..." class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-black focus:outline-none focus:border-[#0072CE] focus:ring-2 focus:ring-[#0072CE]/20 transition-all resize-none" rows="2"></textarea>
+                </div>
+
                 <button type="submit" id="upload-submit-btn" class="mt-4 bg-[#0072CE] text-white w-full py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-[#001D36] transition-all flex justify-center items-center">
                     <span>Upload Sekarang</span>
                     <i id="upload-spinner" class="fa-solid fa-circle-notch fa-spin ml-3 hidden"></i>
@@ -535,6 +540,44 @@
         </button>
         <img id="lightbox-img" src="" alt="Expanded Image" class="max-w-[95%] max-h-[85vh] object-contain transition-transform duration-300 scale-95 drop-shadow-2xl">
         <div id="lightbox-caption" class="absolute bottom-8 text-white/90 font-medium text-center px-4 w-full text-lg tracking-wide drop-shadow-md"></div>
+    </div>
+
+    <!-- Comment Modal -->
+    <div id="comment-modal" class="fixed inset-0 z-[250] bg-black/60 backdrop-blur-sm hidden justify-center items-end md:items-center p-0 md:p-4 transition-all duration-300 opacity-0">
+        <div class="bg-white rounded-t-[32px] md:rounded-[32px] w-full max-w-lg h-[85vh] md:h-[600px] shadow-2xl relative flex flex-col transform translate-y-full md:translate-y-0 transition-transform duration-300" id="comment-modal-content">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center shrink-0">
+                <h3 class="text-xl font-bold text-[#001D36]">Komentar</h3>
+                <button onclick="window.closeCommentModal()" class="text-gray-400 hover:text-black transition-colors p-2 -mr-2">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Comment List Area -->
+            <div id="comment-list-container" class="flex-1 overflow-y-auto p-6 flex flex-col gap-5 bg-gray-50/30">
+                <!-- Loader -->
+                <div id="comment-loader" class="flex justify-center items-center py-8">
+                    <i class="fa-solid fa-circle-notch fa-spin text-2xl text-[#0072CE]"></i>
+                </div>
+                <!-- Comments will be injected here -->
+                <div id="comments-wrapper" class="flex flex-col gap-4 w-full"></div>
+            </div>
+
+            <!-- Comment Input Area -->
+            <div class="p-4 border-t border-gray-100 bg-white shrink-0 md:rounded-b-[32px]">
+                <form id="comment-form" class="flex flex-col gap-3">
+                    <input type="hidden" id="comment-post-id">
+                    <input type="text" id="comment-name" required placeholder="Nama kamu..." class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-[#0072CE] transition-colors font-medium">
+                    <div class="flex gap-2">
+                        <input type="text" id="comment-text" required placeholder="Tulis komentar..." autocomplete="off" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:border-[#0072CE] transition-colors">
+                        <button type="submit" id="comment-submit-btn" class="bg-[#0072CE] text-white px-5 py-2 rounded-lg font-bold hover:bg-[#001D36] transition-colors flex items-center justify-center">
+                            <i id="comment-submit-icon" class="fa-solid fa-paper-plane"></i>
+                            <i id="comment-submit-spinner" class="fa-solid fa-circle-notch fa-spin hidden"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts for Interaction -->
