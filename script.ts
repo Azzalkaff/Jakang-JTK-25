@@ -270,10 +270,15 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
                         <div class="p-4 flex flex-col justify-between">
                             <div class="flex justify-between items-start">
                                 <p class="font-bold text-[#001D36] truncate flex-1">${post.name}</p>
-                                <button onclick="window.likeOotd('${post.id}')" class="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors ml-4 shrink-0">
-                                    <i class="fa-solid fa-heart"></i>
-                                    <span id="like-count-${post.id}" class="font-mono text-sm">${post.likes || 0}</span>
-                                </button>
+                                <div class="flex items-center gap-3 shrink-0 ml-2">
+                                    <button onclick="window.openCommentModal('${post.id}')" class="flex items-center gap-1.5 text-gray-500 hover:text-[#0072CE] transition-colors">
+                                        <i class="fa-regular fa-comment"></i>
+                                    </button>
+                                    <button onclick="window.likeOotd('${post.id}')" class="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition-colors">
+                                        <i class="fa-solid fa-heart"></i>
+                                        <span id="like-count-${post.id}" class="font-mono text-sm">${post.likes || 0}</span>
+                                    </button>
+                                </div>
                             </div>
                             ${commentHtml}
                         </div>
@@ -387,6 +392,130 @@ const addMyExchange = (id: string) => { const arr = getMyExchanges(); arr.push(i
 
     // Initialize fetch
     fetchOotdPosts();
+
+    // 4.5 Comment Logic
+    const commentModal = document.getElementById('comment-modal');
+    const commentModalContent = document.getElementById('comment-modal-content');
+    const commentsWrapper = document.getElementById('comments-wrapper');
+    const commentLoader = document.getElementById('comment-loader');
+    const commentForm = document.getElementById('comment-form') as HTMLFormElement;
+    const commentPostIdInput = document.getElementById('comment-post-id') as HTMLInputElement;
+    const commentNameInput = document.getElementById('comment-name') as HTMLInputElement;
+    const commentTextInput = document.getElementById('comment-text') as HTMLInputElement;
+    const commentSubmitBtn = document.getElementById('comment-submit-btn') as HTMLButtonElement;
+    const commentSubmitIcon = document.getElementById('comment-submit-icon');
+    const commentSubmitSpinner = document.getElementById('comment-submit-spinner');
+
+    (window as any).openCommentModal = async (postId: string) => {
+        if (!commentModal || !commentModalContent || !commentsWrapper || !commentLoader) return;
+        
+        commentPostIdInput.value = postId;
+        commentsWrapper.innerHTML = '';
+        commentLoader.classList.remove('hidden');
+        
+        commentModal.classList.remove('hidden');
+        commentModal.classList.add('flex');
+        
+        // Timeout to allow display:flex to apply before opacity transition
+        setTimeout(() => {
+            commentModal.classList.remove('opacity-0');
+            commentModalContent.classList.remove('translate-y-full');
+        }, 10);
+
+        if (!supabase) return;
+
+        const { data, error } = await supabase
+            .from('ootd_comments')
+            .select('*')
+            .eq('post_id', postId)
+            .order('created_at', { ascending: false });
+
+        commentLoader.classList.add('hidden');
+
+        if (error) {
+            commentsWrapper.innerHTML = `<p class="text-red-500 text-center text-sm">Gagal memuat komentar: ${error.message}</p>`;
+            return;
+        }
+
+        if (data && data.length > 0) {
+            data.forEach((c: any) => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-1';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-sm text-[#001D36]">${c.name}</span>
+                        <span class="text-[10px] text-gray-400 font-mono">${new Date(c.created_at).toLocaleDateString('id-ID')}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 break-words">${c.text}</p>
+                `;
+                commentsWrapper.appendChild(div);
+            });
+        } else {
+            commentsWrapper.innerHTML = `<p class="text-center text-gray-400 text-sm italic py-8">Belum ada komentar. Jadilah yang pertama!</p>`;
+        }
+    };
+
+    (window as any).closeCommentModal = () => {
+        if (!commentModal || !commentModalContent) return;
+        
+        commentModal.classList.add('opacity-0');
+        commentModalContent.classList.add('translate-y-full');
+        
+        setTimeout(() => {
+            commentModal.classList.add('hidden');
+            commentModal.classList.remove('flex');
+        }, 300);
+    };
+
+    if (commentForm) {
+        commentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const postId = commentPostIdInput.value;
+            const name = commentNameInput.value.trim();
+            const text = commentTextInput.value.trim();
+
+            if (!postId || !name || !text || !supabase) return;
+
+            try {
+                commentSubmitBtn.disabled = true;
+                commentSubmitIcon?.classList.add('hidden');
+                commentSubmitSpinner?.classList.remove('hidden');
+
+                const { data, error } = await supabase
+                    .from('ootd_comments')
+                    .insert([{ post_id: postId, name, text }])
+                    .select();
+
+                if (error) throw error;
+
+                commentTextInput.value = '';
+                
+                // Immediately append new comment to UI
+                if (data && data[0] && commentsWrapper) {
+                    const noCommentMsg = commentsWrapper.querySelector('.italic');
+                    if (noCommentMsg) noCommentMsg.remove();
+
+                    const div = document.createElement('div');
+                    div.className = 'bg-blue-50 p-4 rounded-2xl shadow-sm border border-blue-100 flex flex-col gap-1';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-sm text-[#0072CE]">${data[0].name}</span>
+                            <span class="text-[10px] text-[#0072CE]/60 font-mono">Baru saja</span>
+                        </div>
+                        <p class="text-sm text-gray-700 break-words">${data[0].text}</p>
+                    `;
+                    commentsWrapper.prepend(div);
+                    commentsWrapper.scrollTop = 0;
+                }
+            } catch (err: any) {
+                alert(`Gagal mengirim komentar: ${err.message}`);
+            } finally {
+                commentSubmitBtn.disabled = false;
+                commentSubmitIcon?.classList.remove('hidden');
+                commentSubmitSpinner?.classList.add('hidden');
+            }
+        });
+    }
 
     // 5. Size Exchange Logic (Supabase)
     const excForm = document.getElementById('exchange-form') as HTMLFormElement;
